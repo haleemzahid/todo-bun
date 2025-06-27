@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App - Bun API Practice</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#64748b',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-2xl">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">Todo App</h1>
+            <p class="text-gray-600">Built with Bun API + Vanilla JS + Tailwind CSS</p>
+        </div>
+
+        <!-- Add Todo Form -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <form id="todoForm" class="flex gap-3">
+                <input 
+                    type="text" 
+                    id="todoInput" 
+                    placeholder="What needs to be done?" 
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    required
+                >
+                <button 
+                    type="submit" 
+                    class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors duration-200"
+                >
+                    Add Todo
+                </button>
+            </form>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-3 gap-4 mb-6">
+            <div class="bg-white rounded-lg shadow-md p-4 text-center">
+                <div class="text-2xl font-bold text-primary" id="totalCount">0</div>
+                <div class="text-sm text-gray-600">Total</div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-4 text-center">
+                <div class="text-2xl font-bold text-green-600" id="completedCount">0</div>
+                <div class="text-sm text-gray-600">Completed</div>
+            </div>
+            <div class="bg-white rounded-lg shadow-md p-4 text-center">
+                <div class="text-2xl font-bold text-orange-600" id="pendingCount">0</div>
+                <div class="text-sm text-gray-600">Pending</div>
+            </div>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="flex justify-center gap-2 mb-6">
+            <button 
+                class="filter-btn px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200 active" 
+                data-filter="all"
+            >
+                All
+            </button>
+            <button 
+                class="filter-btn px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" 
+                data-filter="pending"
+            >
+                Pending
+            </button>
+            <button 
+                class="filter-btn px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition-colors duration-200" 
+                data-filter="completed"
+            >
+                Completed
+            </button>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="hidden text-center py-8">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <p class="mt-2 text-gray-600">Loading todos...</p>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
+            <p id="errorMessage"></p>
+        </div>
+
+        <!-- Todo List -->
+        <div class="bg-white rounded-lg shadow-md">
+            <div id="todoList" class="divide-y divide-gray-200">
+                <!-- Todos will be inserted here -->
+            </div>
+            
+            <!-- Empty State -->
+            <div id="emptyState" class="text-center py-12 text-gray-500">
+                <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                <p class="text-lg font-medium">No todos yet</p>
+                <p class="text-sm">Add your first todo above to get started!</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 text-sm text-gray-500">
+            <p>🚀 Built with <a href="https://bun.sh" class="text-primary hover:underline">Bun</a></p>
+            <p class="mt-1">Learn API development with this hands-on project!</p>
+        </div>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+</body>
+</html>

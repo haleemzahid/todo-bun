@@ -1,0 +1,13 @@
+{
+  "name": "bun-todo-app",
+  "version": "1.0.0",
+  "description": "A full-stack Todo app built with Bun, vanilla JavaScript, and Tailwind CSS",
+  "main": "server.js",
+  "scripts": {
+    "dev": "bun run --watch server.js",
+    "start": "bun run server.js"
+  },
+  "dependencies": {
+    "bun": "latest"
+  }
+}
