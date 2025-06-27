@@ -1,15 +1,93 @@
-// Todo App - Vanilla JavaScript with Bun API
+// Todo App - Vanilla JavaScript with Bun API and Authentication
 class TodoApp {
     constructor() {
         this.todos = [];
         this.currentFilter = 'all';
+        this.user = null;
         this.init();
     }
 
     // Initialize the application
-    init() {
+    async init() {
+        await this.checkAuthentication();
         this.bindEvents();
         this.loadTodos();
+    }
+
+    // Check authentication status
+    async checkAuthentication() {
+        try {
+            // First check localStorage for cached user info
+            const cachedUser = localStorage.getItem('user');
+            if (cachedUser) {
+                this.user = JSON.parse(cachedUser);
+                this.updateUserUI();
+            }
+
+            // Verify with server
+            const response = await fetch('/api/auth/me', {
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                // Not authenticated, redirect to auth page
+                localStorage.removeItem('user');
+                window.location.href = '/auth.html';
+                return;
+            }
+
+            const data = await response.json();
+            this.user = data.user;
+            localStorage.setItem('user', JSON.stringify(this.user));
+            this.updateUserUI();
+
+        } catch (error) {
+            console.error('Authentication check failed:', error);
+            localStorage.removeItem('user');
+            window.location.href = '/auth.html';
+        }
+    }
+
+    // Update UI with user information
+    updateUserUI() {
+        if (!this.user) return;
+
+        const userAvatar = document.getElementById('userAvatar');
+        const userName = document.getElementById('userName');
+        const userEmail = document.getElementById('userEmail');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+
+        if (userAvatar) {
+            userAvatar.textContent = this.user.username.charAt(0).toUpperCase();
+        }
+        if (userName) {
+            userName.textContent = this.user.username;
+        }
+        if (userEmail) {
+            userEmail.textContent = this.user.email;
+        }
+        if (welcomeMessage) {
+            welcomeMessage.textContent = `Welcome back, ${this.user.username}! Manage your personal todos below.`;
+        }
+    }
+
+    // Handle logout
+    async handleLogout() {
+        try {
+            const response = await fetch('/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+
+            localStorage.removeItem('user');
+            window.location.href = '/auth.html';
+
+        } catch (error) {
+            console.error('Logout failed:', error);
+            // Force redirect even if logout request fails
+            localStorage.removeItem('user');
+            window.location.href = '/auth.html';
+        }
     }
 
     // Bind event listeners
@@ -23,6 +101,31 @@ class TodoApp {
         filterButtons.forEach(btn => {
             btn.addEventListener('click', (e) => this.handleFilterChange(e));
         });
+
+        // User menu events
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userDropdown = document.getElementById('userDropdown');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        if (userMenuBtn && userDropdown) {
+            userMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                userDropdown.classList.toggle('hidden');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', () => {
+                userDropdown.classList.add('hidden');
+            });
+
+            userDropdown.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        }
+
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => this.handleLogout());
+        }
     }
 
     // API Methods
@@ -33,8 +136,16 @@ class TodoApp {
                     'Content-Type': 'application/json',
                     ...options.headers
                 },
+                credentials: 'include', // Include cookies for authentication
                 ...options
             });
+
+            if (response.status === 401) {
+                // Unauthorized - redirect to login
+                localStorage.removeItem('user');
+                window.location.href = '/auth.html';
+                return;
+            }
 
             if (!response.ok) {
                 const errorData = await response.json();
@@ -43,7 +154,12 @@ class TodoApp {
 
             return await response.json();
         } catch (error) {
-            this.showError(error.message);
+            if (error.message.includes('fetch')) {
+                // Network error
+                this.showError('Network error. Please check your connection.');
+            } else {
+                this.showError(error.message);
+            }
             throw error;
         }
     }

@@ -20,10 +20,33 @@
 </head>
 <body class="bg-gray-50 min-h-screen">
     <div class="container mx-auto px-4 py-8 max-w-2xl">
-        <!-- Header -->
+        <!-- Header with User Info -->
         <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-800 mb-2">Todo App</h1>
-            <p class="text-gray-600">Built with Bun API + Vanilla JS + Tailwind CSS</p>
+            <div class="flex justify-between items-center mb-4">
+                <div></div> <!-- Spacer -->
+                <h1 class="text-4xl font-bold text-gray-800">Todo App</h1>
+                <div class="relative">
+                    <button id="userMenuBtn" class="flex items-center space-x-2 text-gray-700 hover:text-primary focus:outline-none">
+                        <div class="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center font-medium" id="userAvatar">
+                            U
+                        </div>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <!-- User Dropdown Menu -->
+                    <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                        <div class="px-4 py-3 border-b border-gray-200">
+                            <p class="text-sm font-medium text-gray-800 truncate" id="userName" title="">User Name</p>
+                            <p class="text-sm text-gray-600 truncate" id="userEmail" title="">user@example.com</p>
+                        </div>
+                        <button id="logoutBtn" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-lg">
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <p class="text-gray-600" id="welcomeMessage">Welcome back! Manage your personal todos below.</p>
         </div>
 
         <!-- Add Todo Form -->
