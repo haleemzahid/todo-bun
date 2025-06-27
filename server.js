@@ -13,8 +13,6 @@ import "./utils/database.js";
 
 const server = serve({
   port: process.env.PORT || 3000,
-  hostname: process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost',
-  
   routes: {
     // Serve the HTML pages
     "/": index,
