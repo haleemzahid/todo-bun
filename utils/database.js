@@ -1,7 +1,19 @@
 import { Database } from "bun:sqlite";
+import { existsSync, mkdirSync } from "fs";
+
+// Create data directory for production if it doesn't exist
+const dataDir = process.env.NODE_ENV === 'production' ? '/app/data' : '.';
+if (process.env.NODE_ENV === 'production' && !existsSync(dataDir)) {
+  mkdirSync(dataDir, { recursive: true });
+}
+
+// Database path - use persistent volume in production
+const dbPath = process.env.NODE_ENV === 'production' 
+  ? '/app/data/todos.db' 
+  : 'todos.db';
 
 // Initialize SQLite database
-const db = new Database("todos.db");
+const db = new Database(dbPath);
 
 // Create users table if it doesn't exist
 db.exec(`

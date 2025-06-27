@@ -12,6 +12,9 @@ import { profileRoutes } from "./routes/profile.js";
 import "./utils/database.js";
 
 const server = serve({
+  port: process.env.PORT || 3000,
+  hostname: process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost',
+  
   routes: {
     // Serve the HTML pages
     "/": index,
@@ -42,7 +45,7 @@ const server = serve({
   },
   
   // Enable development mode for hot reloading and detailed errors
-  development: true,
+  development: process.env.NODE_ENV !== 'production',
   
   // Handle 404s for unmatched routes
   async fetch(req) {
