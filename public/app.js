@@ -3,6 +3,7 @@ class TodoApp {
     constructor() {
         this.todos = [];
         this.currentFilter = 'all';
+        this.searchTerm = '';
         this.user = null;
         this.init();
     }
@@ -126,6 +127,35 @@ class TodoApp {
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => this.handleLogout());
         }
+
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const clearSearch = document.getElementById('clearSearch');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => this.handleSearch(e.target.value));
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    this.clearSearch();
+                }
+            });
+        }
+
+        if (clearSearch) {
+            clearSearch.addEventListener('click', () => this.clearSearch());
+        }
+
+        // Add keyboard shortcut for search (Ctrl+F / Cmd+F)
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) {
+                    searchInput.focus();
+                    searchInput.select();
+                }
+            }
+        });
     }
 
     // API Methods
@@ -308,6 +338,50 @@ class TodoApp {
         }
     }
 
+    // Search Methods
+    handleSearch(searchTerm) {
+        this.searchTerm = searchTerm.toLowerCase().trim();
+        this.renderTodos();
+        this.updateSearchUI();
+    }
+
+    clearSearch() {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+        this.searchTerm = '';
+        this.renderTodos();
+        this.updateSearchUI();
+    }
+
+    updateSearchUI() {
+        const clearButton = document.getElementById('clearSearch');
+        const searchResults = document.getElementById('searchResults');
+        const searchResultsText = document.getElementById('searchResultsText');
+        
+        if (clearButton) {
+            if (this.searchTerm) {
+                clearButton.classList.remove('hidden');
+            } else {
+                clearButton.classList.add('hidden');
+            }
+        }
+
+        if (searchResults && searchResultsText) {
+            if (this.searchTerm) {
+                const filteredTodos = this.getFilteredTodos();
+                const totalTodos = this.todos.length;
+                const foundCount = filteredTodos.length;
+                
+                searchResultsText.textContent = `Found ${foundCount} of ${totalTodos} todos`;
+                searchResults.classList.remove('hidden');
+            } else {
+                searchResults.classList.add('hidden');
+            }
+        }
+    }
+
     // UI Methods
     renderTodos() {
         const todoList = document.getElementById('todoList');
@@ -318,6 +392,7 @@ class TodoApp {
         if (filteredTodos.length === 0) {
             todoList.innerHTML = '';
             emptyState.style.display = 'block';
+            this.updateEmptyState();
             return;
         }
         
@@ -328,6 +403,25 @@ class TodoApp {
         this.bindTodoEvents();
     }
 
+    updateEmptyState() {
+        const emptyState = document.getElementById('emptyState');
+        const emptyStateText = emptyState.querySelector('p:last-child');
+        
+        if (this.searchTerm) {
+            emptyState.querySelector('p.text-lg').textContent = 'No todos found';
+            emptyStateText.textContent = `No todos match "${this.searchTerm}". Try a different search term.`;
+        } else if (this.currentFilter === 'completed') {
+            emptyState.querySelector('p.text-lg').textContent = 'No completed todos';
+            emptyStateText.textContent = 'You haven\'t completed any todos yet. Keep working!';
+        } else if (this.currentFilter === 'pending') {
+            emptyState.querySelector('p.text-lg').textContent = 'No pending todos';
+            emptyStateText.textContent = 'Great job! You\'ve completed all your todos.';
+        } else {
+            emptyState.querySelector('p.text-lg').textContent = 'No todos yet';
+            emptyStateText.textContent = 'Add your first todo above to get started!';
+        }
+    }
+
     createTodoHTML(todo) {
         const formattedDate = new Date(todo.created_at).toLocaleDateString('en-US', {
             year: 'numeric',
@@ -336,6 +430,13 @@ class TodoApp {
             hour: '2-digit',
             minute: '2-digit'
         });
+
+        // Highlight search terms
+        let displayText = this.escapeHtml(todo.text);
+        if (this.searchTerm) {
+            const regex = new RegExp(`(${this.escapeRegex(this.searchTerm)})`, 'gi');
+            displayText = displayText.replace(regex, '<mark class="bg-yellow-200 px-1 rounded">$1</mark>');
+        }
 
         return `
             <div class="todo-item p-4 hover:bg-gray-50 transition-colors duration-200" data-id="${todo.id}">
@@ -348,7 +449,7 @@ class TodoApp {
                         >
                         <div class="flex-1 min-w-0">
                             <p class="todo-text text-gray-900 ${todo.completed ? 'line-through text-gray-500' : ''} break-words">
-                                ${this.escapeHtml(todo.text)}
+                                ${displayText}
                             </p>
                             <p class="text-xs text-gray-500 mt-1">
                                 Created: ${formattedDate}
@@ -370,6 +471,10 @@ class TodoApp {
                 </div>
             </div>
         `;
+    }
+
+    escapeRegex(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
     bindTodoEvents() {
@@ -439,24 +544,49 @@ class TodoApp {
     }
 
     getFilteredTodos() {
+        let todos = this.todos;
+
+        // Apply search filter
+        if (this.searchTerm) {
+            todos = todos.filter(todo => 
+                todo.text.toLowerCase().includes(this.searchTerm)
+            );
+        }
+
         switch (this.currentFilter) {
             case 'completed':
-                return this.todos.filter(todo => todo.completed);
+                return todos.filter(todo => todo.completed);
             case 'pending':
-                return this.todos.filter(todo => !todo.completed);
+                return todos.filter(todo => !todo.completed);
             default:
-                return this.todos;
+                return todos;
         }
     }
 
     updateStats() {
-        const total = this.todos.length;
-        const completed = this.todos.filter(todo => todo.completed).length;
+        const filteredTodos = this.getFilteredTodos();
+        const total = filteredTodos.length;
+        const completed = filteredTodos.filter(todo => todo.completed).length;
         const pending = total - completed;
 
         document.getElementById('totalCount').textContent = total;
         document.getElementById('completedCount').textContent = completed;
         document.getElementById('pendingCount').textContent = pending;
+
+        // Update stats labels if search is active
+        const totalLabel = document.querySelector('#totalCount').nextElementSibling;
+        const completedLabel = document.querySelector('#completedCount').nextElementSibling;
+        const pendingLabel = document.querySelector('#pendingCount').nextElementSibling;
+
+        if (this.searchTerm) {
+            totalLabel.textContent = 'Found';
+            completedLabel.textContent = 'Completed';
+            pendingLabel.textContent = 'Pending';
+        } else {
+            totalLabel.textContent = 'Total';
+            completedLabel.textContent = 'Completed';
+            pendingLabel.textContent = 'Pending';
+        }
     }
 
     showLoading(show = true) {

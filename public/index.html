@@ -40,6 +40,12 @@
                             <p class="text-sm font-medium text-gray-800 truncate" id="userName" title="">User Name</p>
                             <p class="text-sm text-gray-600 truncate" id="userEmail" title="">user@example.com</p>
                         </div>
+                        <a href="/profile.html" id="profileBtn" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            <span>Profile Settings</span>
+                        </a>
                         <button id="logoutBtn" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-b-lg">
                             Sign Out
                         </button>
@@ -81,6 +87,39 @@
             <div class="bg-white rounded-lg shadow-md p-4 text-center">
                 <div class="text-2xl font-bold text-orange-600" id="pendingCount">0</div>
                 <div class="text-sm text-gray-600">Pending</div>
+            </div>
+        </div>
+
+        <!-- Filter Buttons -->
+        <div class="flex justify-center gap-2 mb-6">
+            <!-- Search Input -->
+            <div class="w-full max-w-md mb-4">
+                <div class="relative">
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Search todos..." 
+                        class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    >
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <button 
+                        id="clearSearch" 
+                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 hidden"
+                        title="Clear search"
+                    >
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <!-- Search Results Counter -->
+                <div id="searchResults" class="text-sm text-gray-600 mt-2 text-center hidden">
+                    <span id="searchResultsText"></span>
+                </div>
             </div>
         </div>
 
